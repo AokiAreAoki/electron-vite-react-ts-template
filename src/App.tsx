@@ -1,40 +1,54 @@
-import { useState } from 'react'
-import UpdateElectron from '@/components/update'
-import logoVite from './assets/logo-vite.svg'
-import logoElectron from './assets/logo-electron.svg'
-import './App.css'
+import styled from "@emotion/styled";
+import { useCallback, useState } from "react";
+import Flex from "./components/Flex";
+import API from "./utils/api";
+import Nullable from "./types/Nullable";
 
-console.log('[App.tsx]', `Hello world from Electron ${process.versions.electron}!`)
+const Root = styled(Flex)`
+	width: 100vw;
+	height: 100vh;
 
-function App() {
-  const [count, setCount] = useState(0)
-  return (
-    <div className='App'>
-      <div className='logo-box'>
-        <a href='https://github.com/electron-vite/electron-vite-react' target='_blank'>
-          <img src={logoVite} className='logo vite' alt='Electron + Vite logo' />
-          <img src={logoElectron} className='logo electron' alt='Electron + Vite logo' />
-        </a>
-      </div>
-      <h1>Electron + Vite + React</h1>
-      <div className='card'>
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className='read-the-docs'>
-        Click on the Electron + Vite logo to learn more
-      </p>
-      <div className='flex-center'>
-        Place static files into the<code>/public</code> folder <img style={{ width: '5em' }} src='./node.svg' alt='Node logo' />
-      </div>
+	padding: 10px;
+	overflow: hidden;
+`;
 
-      <UpdateElectron />
-    </div>
-  )
+interface Nonce {
+	ping?: Nullable<string>;
+	pong?: Nullable<string>;
 }
 
-export default App
+function App() {
+	const [nonce, setNonce] = useState<Nonce>({});
+
+	const ping = useCallback(async () => {
+		const pingNonce = Math.floor(Math.random() * 999)
+			.toString()
+			.padStart(3, "0");
+		setNonce((prev) => ({ ...prev, ping: pingNonce }));
+
+		const pongNonce = await API.ping(pingNonce).catch((error) => {
+			console.error(error);
+			return null;
+		});
+		setNonce((prev) => ({ ...prev, pong: pongNonce }));
+	}, []);
+
+	return (
+		<Root className="font-mono" dir="column" justify="center" align="center" gap="10px">
+			<button onClick={ping}>Send ping</button>
+
+			<Flex dir="row" justify="center" gap="8px" wrap>
+				{[nonce.ping && `Ping (${nonce.ping})`, nonce.pong && `Pong (${nonce.pong})`]
+					.filter((s) => !!s)
+					.map((string, index) => (
+						<>
+							{index !== 0 && <div key={index * 2 - 1}>::</div>}
+							<div key={index * 2}>{string}</div>
+						</>
+					))}
+			</Flex>
+		</Root>
+	);
+}
+
+export default App;
