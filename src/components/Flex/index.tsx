@@ -22,6 +22,7 @@ interface StyledFlexProps extends React.HTMLAttributes<HTMLDivElement> {
 	justify?: CSSProperties["justifyContent"];
 	align?: CSSProperties["alignItems"];
 
+	sizing?: CSSProperties["boxSizing"] | boolean;
 	basis?: CSSProperties["flexBasis"];
 	grow?: CSSProperties["flexGrow"] | boolean;
 	shrink?: CSSProperties["flexShrink"] | boolean;
@@ -43,7 +44,6 @@ function shorthandValue<V>(cssRule: string, value: V | boolean | undefined, shor
 
 const StyledFlex = styled.div<StyledFlexProps>`
 	display: flex;
-	box-sizing: border-box;
 
 	${(props) => shorthandValue("overflow", props.overflow, "hidden overlay")}
 
@@ -54,6 +54,7 @@ const StyledFlex = styled.div<StyledFlexProps>`
 	${(props) => shorthandValue(`justify-content`, props.justify, "start")};
 	${(props) => shorthandValue(`align-items`, props.align, "start")};
 
+	${(props) => shorthandValue(`box-sizing`, props.sizing, "border-box")};
 	${(props) => shorthandValue(`flex-basis`, props.basis, "auto")};
 	${(props) => shorthandValue(`flex-grow`, props.grow, 1)};
 	${(props) => shorthandValue(`flex-shrink`, props.shrink, 1)};
